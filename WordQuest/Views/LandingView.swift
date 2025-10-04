@@ -102,7 +102,7 @@ struct LandingView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 30))
                         .shadow(color: .blue.opacity(0.4), radius: 15, x: 0, y: 8)
                     }
-                    .buttonStyle(ScaleButtonStyle())
+                    .buttonStyle(.borderedProminent)
                     
                     // How It Works Button
                     Button(action: {
@@ -120,7 +120,7 @@ struct LandingView: View {
                         .background(.ultraThinMaterial)
                         .clipShape(RoundedRectangle(cornerRadius: 25))
                     }
-                    .buttonStyle(ScaleButtonStyle())
+                    .buttonStyle(.borderedProminent)
                 }
                 .padding(.horizontal, 40)
                 
@@ -267,13 +267,7 @@ struct HowItWorksStep: View {
     }
 }
 
-struct ScaleButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
-    }
-}
+// ScaleButtonStyle moved to ObjectDetectionView to avoid duplication
 
 #Preview(windowStyle: .automatic) {
     LandingView()

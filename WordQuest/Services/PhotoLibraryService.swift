@@ -40,9 +40,11 @@ class PhotoLibraryService: NSObject, ObservableObject {
     
     func loadPhotos() {
         guard authorizationStatus == .authorized || authorizationStatus == .limited else {
+            print("📸 Photo access not authorized")
             return
         }
         
+        print("📸 Loading photos...")
         isLoading = true
         errorMessage = nil
         
@@ -65,6 +67,7 @@ class PhotoLibraryService: NSObject, ObservableObject {
         DispatchQueue.main.async {
             self.photos = photoDataArray
             self.isLoading = false
+            print("📸 Loaded \(photoDataArray.count) photos")
         }
         
         // Load thumbnails asynchronously
@@ -72,6 +75,7 @@ class PhotoLibraryService: NSObject, ObservableObject {
     }
     
     private func loadThumbnails(for photos: [PhotoData]) {
+        print("🖼️ Loading thumbnails for \(photos.count) photos")
         let assetIdentifiers = photos.map { $0.assetIdentifier }
         let assets = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
         
@@ -81,8 +85,7 @@ class PhotoLibraryService: NSObject, ObservableObject {
         requestOptions.deliveryMode = .opportunistic
         requestOptions.resizeMode = .exact
         
-        var photoIndex = 0
-        assets.enumerateObjects { asset, _, _ in
+        assets.enumerateObjects { asset, index, _ in
             self.imageManager.requestImage(
                 for: asset,
                 targetSize: thumbnailSize,
@@ -90,17 +93,16 @@ class PhotoLibraryService: NSObject, ObservableObject {
                 options: requestOptions
             ) { image, _ in
                 DispatchQueue.main.async {
-                    if photoIndex < self.photos.count {
+                    if index < self.photos.count {
                         let updatedPhoto = PhotoData(
-                            assetIdentifier: self.photos[photoIndex].assetIdentifier,
+                            assetIdentifier: self.photos[index].assetIdentifier,
                             thumbnail: image,
-                            creationDate: self.photos[photoIndex].creationDate,
-                            isSelected: self.photos[photoIndex].isSelected
+                            creationDate: self.photos[index].creationDate,
+                            isSelected: self.photos[index].isSelected
                         )
-                        self.photos[photoIndex] = updatedPhoto
+                        self.photos[index] = updatedPhoto
                     }
                 }
-                photoIndex += 1
             }
         }
     }

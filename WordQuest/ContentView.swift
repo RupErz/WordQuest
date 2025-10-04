@@ -10,12 +10,18 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var userPreferences = UserPreferences()
     @State private var currentView: AppView = .landing
+    @State private var selectedPhoto: PhotoData?
+    @State private var generatedQuestion: String = ""
+    @State private var nativeLanguage: String = "English"
+    @State private var targetLanguage: String = "Spanish"
     
     enum AppView {
         case landing
         case languageSelection
         case photoSelection
+        case imagePreview
         case objectDetection
+        case languageLearning
         case speechRecording
         case feedback
     }
@@ -34,25 +40,62 @@ struct ContentView: View {
                     }
                 
             case .languageSelection:
-                LanguageSelectionView()
+                LanguageSelectionView(onLanguageSelected: {
+                    currentView = .photoSelection
+                })
                     .onAppear {
                         if userPreferences.hasCompletedOnboarding {
                             currentView = .photoSelection
                         }
                     }
+                    .onChange(of: userPreferences.hasCompletedOnboarding) { _, newValue in
+                        if newValue {
+                            currentView = .photoSelection
+                        }
+                    }
                 
             case .photoSelection:
-                PhotoSelectionView()
+                PhotoSelectionView(onPhotoSelected: { photo in
+                    selectedPhoto = photo
+                    currentView = .imagePreview
+                })
+                
+            case .imagePreview:
+                if let photo = selectedPhoto {
+                    ImagePreviewView(
+                        selectedPhoto: photo,
+                        onAnalyze: {
+                            currentView = .objectDetection
+                        },
+                        onBack: {
+                            currentView = .photoSelection
+                        }
+                    )
+                }
                 
             case .objectDetection:
-                // TODO: Implement ObjectDetectionView
-                Text("Object Detection - Coming Soon")
-                    .font(.title)
+                ObjectDetectionView(selectedPhoto: selectedPhoto, onContinue: { question, native, target in
+                    generatedQuestion = question
+                    nativeLanguage = native
+                    targetLanguage = target
+                    currentView = .languageLearning
+                })
+                
+            case .languageLearning:
+                if let photo = selectedPhoto {
+                    LanguageLearningView(
+                        selectedPhoto: photo,
+                        question: generatedQuestion.isEmpty ? "Loading your personalized question..." : generatedQuestion,
+                        nativeLanguage: nativeLanguage,
+                        targetLanguage: targetLanguage,
+                        onStartRecording: {
+                            currentView = .speechRecording
+                        }
+                    )
+                }
                 
             case .speechRecording:
-                // TODO: Implement SpeechRecordingView
-                Text("Speech Recording - Coming Soon")
-                    .font(.title)
+                SpeechRecordingView()
                 
             case .feedback:
                 // TODO: Implement FeedbackView

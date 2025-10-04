@@ -13,10 +13,10 @@ struct PhotoSelectionView: View {
     @EnvironmentObject var userPreferences: UserPreferences
     @State private var showingPhotoPreview = false
     @State private var selectedPhotoForPreview: PhotoData?
+    var onPhotoSelected: ((PhotoData) -> Void)?
     
     var body: some View {
-        NavigationView {
-            ZStack {
+        ZStack {
                 // Background
                 LinearGradient(
                     colors: [
@@ -67,21 +67,21 @@ struct PhotoSelectionView: View {
                     }
                 }
             }
-            .navigationTitle("Photo Selection")
-            .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 if photoLibraryService.authorizationStatus == .authorized || photoLibraryService.authorizationStatus == .limited {
                     photoLibraryService.loadPhotos()
                 }
             }
-        }
-        .sheet(isPresented: $showingPhotoPreview) {
+            .sheet(isPresented: $showingPhotoPreview) {
             if let photo = selectedPhotoForPreview {
                 PhotoPreviewView(
                     photo: photo,
                     onConfirm: {
                         // Navigate to object detection
                         showingPhotoPreview = false
+                        if let photo = selectedPhotoForPreview {
+                            onPhotoSelected?(photo)
+                        }
                     },
                     onCancel: {
                         showingPhotoPreview = false
@@ -99,13 +99,12 @@ struct PhotoGridView: View {
     
     let columns = [
         GridItem(.flexible()),
-        GridItem(.flexible()),
         GridItem(.flexible())
     ]
     
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: 10) {
+            LazyVGrid(columns: columns, spacing: 15) {
                 ForEach(photos) { photo in
                     PhotoThumbnailView(
                         photo: photo,
@@ -133,12 +132,12 @@ struct PhotoThumbnailView: View {
                     Image(uiImage: thumbnail)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                        .frame(width: 100, height: 100)
+                        .frame(width: 150, height: 150)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 } else {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(Color.gray.opacity(0.3))
-                        .frame(width: 100, height: 100)
+                        .frame(width: 150, height: 150)
                         .overlay(
                             ProgressView()
                                 .scaleEffect(0.8)
@@ -149,7 +148,7 @@ struct PhotoThumbnailView: View {
                 if isSelected {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(Color.blue, lineWidth: 3)
-                        .frame(width: 100, height: 100)
+                        .frame(width: 150, height: 150)
                     
                     VStack {
                         Spacer()
@@ -310,12 +309,11 @@ struct PhotoPreviewView: View {
     
     private func loadFullSizeImage() {
         Task {
-            if let photoLibraryService = PhotoLibraryService() as? PhotoLibraryService {
-                let image = await photoLibraryService.getFullSizeImage(for: photo)
-                await MainActor.run {
-                    self.fullSizeImage = image
-                    self.isLoading = false
-                }
+            let photoLibraryService = PhotoLibraryService()
+            let image = await photoLibraryService.getFullSizeImage(for: photo)
+            await MainActor.run {
+                self.fullSizeImage = image
+                self.isLoading = false
             }
         }
     }

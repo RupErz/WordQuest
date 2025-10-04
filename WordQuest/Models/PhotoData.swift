@@ -11,7 +11,7 @@ import UIKit
 struct PhotoData: Identifiable, Hashable {
     let id = UUID()
     let assetIdentifier: String
-    let thumbnail: UIImage?
+    var thumbnail: UIImage?
     let creationDate: Date?
     let isSelected: Bool
     

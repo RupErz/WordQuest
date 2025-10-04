@@ -10,6 +10,7 @@ import SwiftUI
 struct LanguageSelectionView: View {
     @EnvironmentObject var userPreferences: UserPreferences
     @State private var showingDifficultySelection = false
+    var onLanguageSelected: (() -> Void)?
     
     var body: some View {
         NavigationView {
@@ -278,6 +279,10 @@ struct DifficultySelectionView: View {
                     userPreferences.difficultyLevel = selectedDifficulty
                     userPreferences.hasCompletedOnboarding = true
                     dismiss()
+                    // Trigger navigation to photo selection
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        // This will be handled by the parent view
+                    }
                 }) {
                     HStack {
                         Text("Start Learning")
