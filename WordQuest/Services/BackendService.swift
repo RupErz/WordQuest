@@ -11,6 +11,9 @@ import Combine
 
 struct BackendAnalysis: Codable {
     let question: String
+    let answer: String
+    let translation: String
+    let type: String
     let native_language: String
     let target_language: String
 }

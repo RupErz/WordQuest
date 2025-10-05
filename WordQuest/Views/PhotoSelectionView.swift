@@ -11,8 +11,6 @@ import Photos
 struct PhotoSelectionView: View {
     @StateObject private var photoLibraryService = PhotoLibraryService()
     @EnvironmentObject var userPreferences: UserPreferences
-    @State private var showingPhotoPreview = false
-    @State private var selectedPhotoForPreview: PhotoData?
     var onPhotoSelected: ((PhotoData) -> Void)?
     
     var body: some View {
@@ -51,8 +49,7 @@ struct PhotoSelectionView: View {
                             selectedPhoto: photoLibraryService.selectedPhoto,
                             onPhotoSelected: { photo in
                                 photoLibraryService.selectPhoto(photo)
-                                selectedPhotoForPreview = photo
-                                showingPhotoPreview = true
+                                onPhotoSelected?(photo) // Pass the photo to ContentView
                             }
                         )
                     } else {
@@ -72,23 +69,6 @@ struct PhotoSelectionView: View {
                     photoLibraryService.loadPhotos()
                 }
             }
-            .sheet(isPresented: $showingPhotoPreview) {
-            if let photo = selectedPhotoForPreview {
-                PhotoPreviewView(
-                    photo: photo,
-                    onConfirm: {
-                        // Navigate to object detection
-                        showingPhotoPreview = false
-                        if let photo = selectedPhotoForPreview {
-                            onPhotoSelected?(photo)
-                        }
-                    },
-                    onCancel: {
-                        showingPhotoPreview = false
-                    }
-                )
-            }
-        }
     }
 }
 

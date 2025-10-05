@@ -91,9 +91,26 @@ Be brief and focused on one clear object/action from the image.
         print(f"📊 Response length: {len(response.text)} characters")
         print("=" * 80)
         
+        # Parse the structured response
+        lines = response.text.strip().split('\n')
+        parsed_data = {}
+        
+        for line in lines:
+            if line.startswith('Question:'):
+                parsed_data['question'] = line.replace('Question:', '').strip()
+            elif line.startswith('Answer:'):
+                parsed_data['answer'] = line.replace('Answer:', '').strip()
+            elif line.startswith('Translation:'):
+                parsed_data['translation'] = line.replace('Translation:', '').strip()
+            elif line.startswith('Type:'):
+                parsed_data['type'] = line.replace('Type:', '').strip()
+        
         # Return structured response for language learning
         return {
-            "question": response.text,
+            "question": parsed_data.get('question', ''),
+            "answer": parsed_data.get('answer', ''),
+            "translation": parsed_data.get('translation', ''),
+            "type": parsed_data.get('type', 'noun'),
             "native_language": native_language,
             "target_language": target_language
         }

@@ -12,6 +12,8 @@ struct ContentView: View {
     @State private var currentView: AppView = .landing
     @State private var selectedPhoto: PhotoData?
     @State private var generatedQuestion: String = ""
+    @State private var correctAnswer: String = ""
+    @State private var translation: String = ""
     @State private var nativeLanguage: String = "English"
     @State private var targetLanguage: String = "Spanish"
     
@@ -74,8 +76,10 @@ struct ContentView: View {
                 }
                 
             case .objectDetection:
-                ObjectDetectionView(selectedPhoto: selectedPhoto, onContinue: { question, native, target in
+                ObjectDetectionView(selectedPhoto: selectedPhoto, onContinue: { question, answer, translationText, native, target in
                     generatedQuestion = question
+                    correctAnswer = answer
+                    translation = translationText
                     nativeLanguage = native
                     targetLanguage = target
                     currentView = .languageLearning
@@ -95,7 +99,19 @@ struct ContentView: View {
                 }
                 
             case .speechRecording:
-                SpeechRecordingView()
+                if let photo = selectedPhoto {
+                    SpeechRecordingView(
+                        selectedPhoto: photo,
+                        question: generatedQuestion,
+                        correctAnswer: correctAnswer,
+                        translation: translation,
+                        nativeLanguage: nativeLanguage,
+                        targetLanguage: targetLanguage,
+                        onBackToPhotoSelection: {
+                            currentView = .photoSelection
+                        }
+                    )
+                }
                 
             case .feedback:
                 // TODO: Implement FeedbackView

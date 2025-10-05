@@ -18,7 +18,7 @@ struct ObjectDetectionView: View {
     @State private var isDetecting = false
     @State private var detectionComplete = false
     @State private var backendAnalysis: BackendAnalysis?
-    var onContinue: ((String, String, String) -> Void)? // question, nativeLanguage, targetLanguage
+    var onContinue: ((String, String, String, String, String) -> Void)? // question, answer, translation, nativeLanguage, targetLanguage
     
     var body: some View {
         ZStack {
@@ -81,7 +81,7 @@ struct ObjectDetectionView: View {
                             onContinue: {
                                 // Pass the question data to the parent
                                 if let analysis = backendAnalysis {
-                                    onContinue?(analysis.question, analysis.native_language, analysis.target_language)
+                                    onContinue?(analysis.question, analysis.answer, analysis.translation, analysis.native_language, analysis.target_language)
                                 }
                             }
                         )
@@ -254,10 +254,12 @@ struct BackendResultsView: View {
             // Language Learning Question
             if let analysis = analysis {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 15) {
+                    VStack(alignment: .center, spacing: 15) {
                         Text("🎓 Your Fill-in-the-Blank Question")
                             .font(.headline)
                             .foregroundColor(.blue)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
                         
                         Text(analysis.question)
                             .font(.body)
@@ -308,15 +310,8 @@ struct BackendResultsView: View {
     }
 }
 
-struct ScaleButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
-    }
-}
 
 #Preview(windowStyle: .automatic) {
-    ObjectDetectionView(selectedPhoto: nil, onContinue: { _, _, _ in })
+    ObjectDetectionView(selectedPhoto: nil, onContinue: { _, _, _, _, _ in })
         .environmentObject(UserPreferences())
 }
