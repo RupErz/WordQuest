@@ -56,7 +56,7 @@ struct LandingView: View {
                     }
                     
                     // App Name
-                    Text("LanguageVision")
+                    Text("WordQuest")
                         .font(.system(size: 42, weight: .bold, design: .rounded))
                         .foregroundStyle(
                             LinearGradient(
